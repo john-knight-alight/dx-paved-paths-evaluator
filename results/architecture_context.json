@@ -1,0 +1,509 @@
+{
+  "metadata": {
+    "document": "Alight Paved Paths Architecture Context",
+    "version": "1.0.0",
+    "purpose": "Enable automated onboarding of non-compliant repositories to Paved Path standards",
+    "generated": "auto-generated"
+  },
+  "paved_paths": {
+    "definition": "Standardized software development framework providing pre-configured CI/CD, project structures, container deployment, and developer tooling",
+    "principles": [
+      "Trunk-based Development",
+      "Semantic Versioning",
+      "Security by Default",
+      "Infrastructure as Code"
+    ],
+    "types": [
+      {
+        "id": "SpringbootAPI",
+        "template": "dx-template-springboot",
+        "description": "Java Spring Boot REST APIs",
+        "language": "java",
+        "runtime": "container"
+      },
+      {
+        "id": "PythonLambda",
+        "template": "dx-template-python",
+        "description": "Python AWS Lambda functions",
+        "language": "python",
+        "runtime": "lambda"
+      },
+      {
+        "id": "AngularApp",
+        "template": "dx-template-angular",
+        "description": "Angular single-page applications",
+        "language": "typescript",
+        "runtime": "static"
+      },
+      {
+        "id": "Docker",
+        "template": "dx-template-docker",
+        "description": "Custom Docker container images",
+        "language": "any",
+        "runtime": "container"
+      },
+      {
+        "id": "HTML",
+        "template": "dx-template-html",
+        "description": "Static HTML sites",
+        "language": "html",
+        "runtime": "static"
+      },
+      {
+        "id": "JavaApp",
+        "template": "dx-template-java",
+        "description": "Java web applications",
+        "language": "java",
+        "runtime": "container"
+      }
+    ]
+  },
+  "required_files": [
+    {
+      "path": ".alit.json",
+      "purpose": "Paved path configuration (artifact name, BSN, type)",
+      "modifiable": true,
+      "modifiable_scope": "values only",
+      "required": true
+    },
+    {
+      "path": ".cz.json",
+      "purpose": "Commitizen semantic versioning configuration",
+      "modifiable": false,
+      "required": true
+    },
+    {
+      "path": ".pre-commit-config.yaml",
+      "purpose": "Pre-commit hooks configuration",
+      "modifiable": false,
+      "required": true
+    },
+    {
+      "path": "Makefile",
+      "purpose": "Standard development commands",
+      "modifiable": false,
+      "required": true
+    },
+    {
+      "path": ".github/workflows/init.yml",
+      "purpose": "Repository initialization workflow",
+      "modifiable": false,
+      "required": true
+    },
+    {
+      "path": ".github/workflows/pr.yml",
+      "purpose": "Pull request validation workflow",
+      "modifiable": false,
+      "required": true
+    },
+    {
+      "path": ".github/workflows/push.yml",
+      "purpose": "Branch push workflow",
+      "modifiable": false,
+      "required": true
+    },
+    {
+      "path": ".github/workflows/publish.yml",
+      "purpose": "Main branch publish workflow",
+      "modifiable": false,
+      "required": true
+    },
+    {
+      "path": ".devcontainer/",
+      "purpose": "VS Code devcontainer configuration",
+      "modifiable": "limited",
+      "required": true
+    },
+    {
+      "path": "README.md",
+      "purpose": "Project documentation",
+      "modifiable": true,
+      "required": true
+    }
+  ],
+  "configuration": {
+    "alit_json": {
+      "schema": {
+        "build": {
+          "artifact": {
+            "name": "string (lowercase, becomes ECR repo name)",
+            "BusinessServiceName": "string (from ServiceNow)"
+          },
+          "paved_path": "string (PavedPathType)"
+        }
+      },
+      "validation_rules": [
+        "build.artifact.name MUST be lowercase",
+        "build.artifact.name becomes the ECR repository name",
+        "build.paved_path MUST match one of the defined Paved Path types"
+      ],
+      "extended_fields": {
+        "Docker": ["external_image.is_external", "external_image.is_private", "external_image.metadata.registry_uri"],
+        "PythonLambda": ["build.artifact.is_layer"]
+      }
+    },
+    "cz_json": {
+      "schema": {
+        "commitizen": {
+          "name": "cz_customize",
+          "tag_format": "$version",
+          "version_scheme": "semver2",
+          "version": "0.0.0",
+          "update_changelog_on_bump": false,
+          "major_version_zero": true
+        }
+      },
+      "validation_rules": [
+        "When version major > 0, update_changelog_on_bump MUST be true",
+        "Uses conventional commit format: type(scope): message",
+        "Requires JIRA IDs in commit footer"
+      ]
+    },
+    "pre_commit_hooks": [
+      {
+        "id": "check-yaml",
+        "repository": "pre-commit-hooks",
+        "purpose": "Validate YAML syntax"
+      },
+      {
+        "id": "end-of-file-fixer",
+        "repository": "pre-commit-hooks",
+        "purpose": "Ensure files end with newline"
+      },
+      {
+        "id": "trailing-whitespace",
+        "repository": "pre-commit-hooks",
+        "purpose": "Remove trailing whitespace"
+      },
+      {
+        "id": "check-case-conflict",
+        "repository": "pre-commit-hooks",
+        "purpose": "Prevent case conflicts"
+      },
+      {
+        "id": "check-merge-conflict",
+        "repository": "pre-commit-hooks",
+        "purpose": "Detect merge conflict markers"
+      },
+      {
+        "id": "commitizen",
+        "repository": "commitizen-tools",
+        "purpose": "Validate commit messages"
+      },
+      {
+        "id": "detect-secrets",
+        "repository": "Yelp/detect-secrets",
+        "purpose": "Prevent secrets in code"
+      },
+      {
+        "id": "validate-artifact-name-lowercase",
+        "repository": "local",
+        "purpose": "Ensure ECR name is lowercase"
+      }
+    ],
+    "makefile_targets": [
+      {"target": "init", "description": "Initialize development environment"},
+      {"target": "build", "description": "Build the application/container"},
+      {"target": "test", "description": "Run tests"},
+      {"target": "pre-commit", "description": "Run all pre-commit hooks"},
+      {"target": "push", "description": "Push changes to feature branch"},
+      {"target": "pr", "description": "Create pull request to main"},
+      {"target": "ecr-login", "description": "Authenticate to AWS ECR"}
+    ]
+  },
+  "ci_cd": {
+    "platform": "GitHub Actions",
+    "automation_repository": "AlightEngineering/dx-automation",
+    "workflow_triggers": {
+      "push_to_feature_branch": "push.yml",
+      "pull_request_to_main": "pr.yml",
+      "merge_to_main": "publish.yml",
+      "manual": "init.yml"
+    },
+    "reusable_workflows": {
+      "java": {
+        "push": "java-paved-path-push.yml",
+        "pr": "java-paved-path-pull-request.yml",
+        "publish": "java-paved-path-publish.yml"
+      },
+      "python": {
+        "push": "python-paved-path-push.yml",
+        "pr": "python-paved-path-pull-request.yml",
+        "publish": "python-paved-path-publish.yml"
+      },
+      "docker": {
+        "push": "docker-paved-path-push.yml",
+        "pr": "docker-paved-path-pull-request.yml",
+        "publish": "docker-paved-path-publish.yml"
+      },
+      "angular": {
+        "push": "angular-paved-path-push.yml",
+        "pr": "angular-paved-path-pull-request.yml",
+        "publish": "angular-paved-path-publish.yml"
+      },
+      "html": {
+        "push": "html-paved-path-push.yml",
+        "pr": "html-paved-path-pull-request.yml",
+        "publish": "html-paved-path-publish.yml"
+      },
+      "init": "init.yml"
+    },
+    "branching_strategy": {
+      "type": "trunk-based",
+      "long_lived_branches": ["main"],
+      "feature_branch_pattern": "feature/<jira-id>-description",
+      "hotfix_branch_pattern": "hotfix/<jira-id>-description",
+      "rules": [
+        "main is the ONLY long-lived branch",
+        "All merges to main trigger automatic versioning and tagging",
+        "Feature branches are short-lived"
+      ]
+    }
+  },
+  "deployment": {
+    "container_registry": {
+      "type": "AWS ECR",
+      "account": "alight-prod-devops",
+      "uri": "755600509381.dkr.ecr.us-east-1.amazonaws.com",
+      "image_naming": "{registry}/{artifact.name}:{version}"
+    },
+    "infrastructure": {
+      "platform": "AWS ECS Fargate",
+      "iac_tool": "Terraform",
+      "iac_template": "dx-template-tfsolution-fargate",
+      "deployment_pipeline": "AWS CodePipeline",
+      "state_account": "alight-prod-infra-state"
+    },
+    "terraform_resources": [
+      {"file": "ecs-cluster.tf", "resource": "ECS Cluster", "required": true},
+      {"file": "ecs-task.tf", "resource": "ECS Task Definitions", "required": true},
+      {"file": "alb-private.tf", "resource": "Private Application Load Balancer", "required": true},
+      {"file": "alb-public.tfx", "resource": "Public ALB", "required": false},
+      {"file": "nlb.tfx", "resource": "Network Load Balancer", "required": false},
+      {"file": "efs.tf", "resource": "Elastic File System", "required": false},
+      {"file": "s3.tf", "resource": "S3 Bucket", "required": false},
+      {"file": "alb-private-route53.tf", "resource": "Private DNS", "required": true}
+    ]
+  },
+  "developer_experience": {
+    "required_tools": [
+      {
+        "name": "Docker Desktop",
+        "installation": "Manual",
+        "purpose": "Container runtime"
+      },
+      {
+        "name": "VS Code",
+        "installation": "Manual",
+        "purpose": "IDE with devcontainer support"
+      },
+      {
+        "name": "dx-cli",
+        "installation": "pip install dx-cli --trusted-host artifactory.alight.com -i https://artifactory.alight.com/artifactory/api/pypi/dx-pypi-virtual/simple",
+        "purpose": "Alight CLI tool"
+      },
+      {
+        "name": "GitHub CLI",
+        "installation": "Manual",
+        "purpose": "Git operations"
+      }
+    ],
+    "devcontainer": {
+      "environment_variables": {
+        "ENV": "localdev",
+        "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem",
+        "JAVA_OPTS": "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts"
+      },
+      "vscode_extensions": {
+        "java": ["checkmarx.ast-results", "vscjava.vscode-java-pack", "dgileadi.java-decompiler"],
+        "python": ["checkmarx.ast-results", "ms-python.python"],
+        "angular": ["checkmarx.ast-results", "angular.ng-template"]
+      }
+    }
+  },
+  "onboarding_checklist": [
+    {
+      "id": 1,
+      "item": ".alit.json exists with valid paved_path type and artifact.name",
+      "validation": "jq -r '.build.paved_path' .alit.json",
+      "required": true
+    },
+    {
+      "id": 2,
+      "item": ".cz.json exists with commitizen configuration",
+      "validation": "test -f .cz.json",
+      "required": true
+    },
+    {
+      "id": 3,
+      "item": ".pre-commit-config.yaml exists with required hooks",
+      "validation": "test -f .pre-commit-config.yaml",
+      "required": true
+    },
+    {
+      "id": 4,
+      "item": "Makefile exists with standard targets",
+      "validation": "make -n init build test pr",
+      "required": true
+    },
+    {
+      "id": 5,
+      "item": ".github/workflows/ contains all 4 workflow files",
+      "validation": "ls .github/workflows/{init,pr,push,publish}.yml",
+      "required": true
+    },
+    {
+      "id": 6,
+      "item": ".devcontainer/ exists with valid configuration",
+      "validation": "test -d .devcontainer",
+      "required": true
+    },
+    {
+      "id": 7,
+      "item": "README.md documents the project",
+      "validation": "test -f README.md",
+      "required": true
+    },
+    {
+      "id": 8,
+      "item": "Branching strategy follows trunk-based development",
+      "validation": "git branch -r | grep -E '^\\s*origin/main$'",
+      "required": true
+    },
+    {
+      "id": 9,
+      "item": "No secrets or credentials in source code",
+      "validation": "detect-secrets scan",
+      "required": true
+    },
+    {
+      "id": 10,
+      "item": "Artifact name is lowercase",
+      "validation": "jq -r '.build.artifact.name' .alit.json | grep -E '^[a-z0-9-]+$'",
+      "required": true
+    }
+  ],
+  "template_repositories": [
+    {"name": "dx-template-springboot", "description": "Spring Boot API template"},
+    {"name": "dx-template-python", "description": "Python Lambda template"},
+    {"name": "dx-template-angular", "description": "Angular SPA template"},
+    {"name": "dx-template-docker", "description": "Docker container template"},
+    {"name": "dx-template-html", "description": "Static HTML site template"},
+    {"name": "dx-template-java", "description": "Java web application template"},
+    {"name": "dx-template-python-simple", "description": "Simplified Python template"},
+    {"name": "dx-template-tfsolution-fargate", "description": "Terraform Fargate IaC template"},
+    {"name": "dx-template-terraform-modules-ecs", "description": "ECS Terraform modules"},
+    {"name": "dx-template-terraform-modules-alb", "description": "ALB Terraform modules"},
+    {"name": "dx-template-terraform-modules-efs", "description": "EFS Terraform modules"},
+    {"name": "dx-template-terraform-modules-nlb", "description": "NLB Terraform modules"},
+    {"name": "dx-template-terraform-modules-rds", "description": "RDS Terraform modules"},
+    {"name": "dx-template-terraform-modules-s3", "description": "S3 Terraform modules"},
+    {"name": "dx-template-databricks", "description": "Databricks template"}
+  ],
+  "supporting_repositories": [
+    {"name": "dx-automation", "category": "ci_cd", "description": "Central reusable GitHub Actions workflows for all paved paths"},
+    {"name": "dx-action-runner", "category": "ci_cd", "description": "GitHub Actions self-hosted runner configuration"},
+    {"name": "dx-cli", "category": "developer_tool", "description": "Command-line tool for DX operations (create repos, update templates, validate prerequisites)"},
+    {"name": "dx-release-management", "category": "service", "description": "Release Management Service - quality gates, JIRA/ServiceNow integration, release metrics"},
+    {"name": "dx-release-metrics-dx-service-image", "category": "service", "description": "Docker image for Release Metrics service"},
+    {"name": "dx-containers", "category": "devcontainer", "description": "VS Code devcontainer images for all paved paths"},
+    {"name": "dx-alpine", "category": "base_image", "description": "Alpine Linux base image with Alight certificates"},
+    {"name": "dx-node", "category": "base_image", "description": "Node.js runtime base image"},
+    {"name": "dx-python", "category": "base_image", "description": "Python runtime base image"},
+    {"name": "dx-distroless", "category": "base_image", "description": "Minimal distroless base images"},
+    {"name": "dx-base-fastapi", "category": "base_image", "description": "FastAPI Python base image"},
+    {"name": "dx-lib-java", "category": "library", "description": "Java libraries including dx-s3-download"},
+    {"name": "dx-mcpcommonshared-util", "category": "library", "description": "Java library template with BOM support"},
+    {"name": "dx-tf-alight-provider", "category": "iac", "description": "Custom Terraform provider with Alight-specific functions"},
+    {"name": "dx-vms", "category": "infrastructure", "description": "Packer templates for building Vagrant boxes (Rocky Linux)"},
+    {"name": "dx-developer-doc", "category": "documentation", "description": "Internal DX team documentation"},
+    {"name": "dx-userscripts", "category": "utilities", "description": "Developer utility scripts"},
+    {"name": "data-platform-kafka-admin-layer", "category": "example", "description": "Kafka administration layer example"},
+    {"name": "spark-dx-springboot", "category": "example", "description": "Spring Boot example using Paved Path patterns"}
+  ],
+  "release_management_service": {
+    "repository": "dx-release-management",
+    "technology": "FastAPI (Python)",
+    "capabilities": [
+      "Quality gate injection into deployment process",
+      "JIRA ticket status updates (BuildArtifacts, DeployStatus)",
+      "ServiceNow change request integration",
+      "Natural-language queries for release metrics"
+    ],
+    "quality_gates": [
+      {"name": "SNOW Change Compliance", "description": "Validates ServiceNow change request exists and is approved"},
+      {"name": "BSN Approver Validation", "description": "Validates deployer has approval rights for Business Service"}
+    ],
+    "api_endpoints": {
+      "ci": "/api/v1/ci/*",
+      "cd": "/api/v1/cd/*",
+      "snow": "/api/v1/snow/*"
+    }
+  },
+  "docker_image_tagging": {
+    "strategies": [
+      {"type": "external_import", "format": "{name}:{ext_version}-$META", "example": "alpine:3.19.0-1"},
+      {"type": "internal_base", "format": "{name}:{semver}", "example": "my_base:1.2.3"},
+      {"type": "app_on_base", "format": "{name}:{app_semver}-{base}-{base_semver}", "example": "my_app:1.0.0-my_base-1.2.3"},
+      {"type": "app_on_external", "format": "{name}:{app_semver}-{ext}-{ext_ver}-$META", "example": "my_app:1.0.0-alpine-3.19.0-1"}
+    ],
+    "meta_description": "$META is incremented when security patches are applied to external images"
+  },
+  "artifact_registries": {
+    "container_images": {
+      "type": "AWS ECR",
+      "uri": "755600509381.dkr.ecr.us-east-1.amazonaws.com",
+      "account": "alight-prod-devops"
+    },
+    "python_packages": {
+      "type": "Artifactory",
+      "uri": "https://artifactory.alight.com/artifactory/api/pypi/dx-pypi-virtual/simple"
+    },
+    "java_libraries": {
+      "type": "Artifactory",
+      "uri": "https://artifactory.alight.com/artifactory/dx-libs-release-local"
+    }
+  },
+  "standards_mapping": [
+    {
+      "standard": "Trunk-based Development",
+      "implementation": "Single main branch",
+      "enforcement": "PR workflow blocks direct push"
+    },
+    {
+      "standard": "Semantic Versioning",
+      "implementation": "Commitizen + .cz.json",
+      "enforcement": "Pre-commit hook validates"
+    },
+    {
+      "standard": "Conventional Commits",
+      "implementation": "Commitizen templates",
+      "enforcement": "Pre-commit commitizen hook"
+    },
+    {
+      "standard": "Secrets Detection",
+      "implementation": "detect-secrets",
+      "enforcement": "Pre-commit hook"
+    },
+    {
+      "standard": "Container Security",
+      "implementation": "Checkmarx scanning",
+      "enforcement": "PR workflow"
+    },
+    {
+      "standard": "Infrastructure as Code",
+      "implementation": "Terraform templates",
+      "enforcement": "CodePipeline deployment"
+    },
+    {
+      "standard": "Developer Environment",
+      "implementation": "Devcontainers",
+      "enforcement": ".devcontainer/ config"
+    },
+    {
+      "standard": "Release Traceability",
+      "implementation": "RMS + JIRA integration",
+      "enforcement": "Publish workflow updates JIRA tickets"
+    }
+  ]
+}
