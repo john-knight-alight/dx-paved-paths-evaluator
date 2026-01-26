@@ -1,0 +1,79 @@
+{
+  "repositories": [
+    {
+      "name": "dx-template-docker",
+      "url": "https://github.com/AlightEngineering/dx-template-docker",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-ai",
+      "url": "https://github.com/AlightEngineering/dx-template-ai",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-angular",
+      "url": "https://github.com/AlightEngineering/dx-template-angular",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-html",
+      "url": "https://github.com/AlightEngineering/dx-template-html",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-java",
+      "url": "https://github.com/AlightEngineering/dx-template-java",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-python",
+      "url": "https://github.com/AlightEngineering/dx-template-python",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-springboot",
+      "url": "https://github.com/AlightEngineering/dx-template-springboot",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-java-lib",
+      "url": "https://github.com/AlightEngineering/dx-template-java-lib",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-tfsolution-fargate",
+      "url": "https://github.com/AlightEngineering/dx-template-tfsolution-fargate",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-mcp-java",
+      "url": "https://github.com/AlightEngineering/dx-template-mcp-java",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-tfsolution-spa",
+      "url": "https://github.com/AlightEngineering/dx-template-tfsolution-spa",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-java-webapp",
+      "url": "https://github.com/AlightEngineering/dx-template-java-webapp",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-mcp-python-candidate",
+      "url": "https://github.com/AlightEngineering/dx-template-mcp-python-candidate",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-tfsolution-mcp-fargate",
+      "url": "https://github.com/AlightEngineering/dx-template-tfsolution-mcp-fargate",
+      "refs": "main"
+    },
+    {
+      "name": "dx-template-mcp-python-opensearch-candidate",
+      "url": "https://github.com/AlightEngineering/dx-template-mcp-python-opensearch-candidate",
+      "refs": "main"
+    }
+  ]
+}

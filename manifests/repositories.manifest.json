@@ -1,0 +1,99 @@
+{
+  "repositories": [
+    {
+      "name": "dx-action-runner",
+      "url": "https://github.com/AlightEngineering/dx-action-runner",
+      "refs": "main"
+    },
+    {
+      "name": "dx-alpine",
+      "url": "https://github.com/AlightEngineering/dx-alpine",
+      "refs": "main"
+    },
+    {
+      "name": "dx-automation",
+      "url": "https://github.com/AlightEngineering/dx-automation",
+      "refs": "main"
+    },
+    {
+      "name": "dx-base-fastapi",
+      "url": "https://github.com/AlightEngineering/dx-base-fastapi",
+      "refs": "main"
+    },
+    {
+      "name": "dx-cli",
+      "url": "https://github.com/AlightEngineering/dx-cli",
+      "refs": "main"
+    },
+    {
+      "name": "dx-containers",
+      "url": "https://github.com/AlightEngineering/dx-containers",
+      "refs": "main"
+    },
+    {
+      "name": "dx-developer-doc",
+      "url": "https://github.com/AlightEngineering/dx-developer-doc",
+      "refs": "main"
+    },
+    {
+      "name": "dx-distroless",
+      "url": "https://github.com/AlightEngineering/dx-distroless",
+      "refs": "main"
+    },
+    {
+      "name": "dx-lib-java",
+      "url": "https://github.com/AlightEngineering/dx-lib-java",
+      "refs": "main"
+    },
+    {
+      "name": "dx-mcpcommonshared-util",
+      "url": "https://github.com/AlightEngineering/dx-mcpcommonshared-util",
+      "refs": "main"
+    },
+    {
+      "name": "dx-node",
+      "url": "https://github.com/AlightEngineering/dx-node",
+      "refs": "main"
+    },
+    {
+      "name": "dx-python",
+      "url": "https://github.com/AlightEngineering/dx-python",
+      "refs": "main"
+    },
+    {
+      "name": "dx-release-management",
+      "url": "https://github.com/AlightEngineering/dx-release-management",
+      "refs": "main"
+    },
+    {
+      "name": "dx-release-metrics-dx-service-image",
+      "url": "https://github.com/AlightEngineering/dx-release-metrics-dx-service-image",
+      "refs": "main"
+    },
+    {
+      "name": "dx-tf-alight-provider",
+      "url": "https://github.com/AlightEngineering/dx-tf-alight-provider",
+      "refs": "main"
+    },
+    {
+      "name": "dx-userscripts",
+      "url": "https://github.com/AlightEngineering/dx-userscripts",
+      "refs": "main"
+    },
+    {
+      "name": "dx-vms",
+      "url": "https://github.com/AlightEngineering/dx-vms",
+      "refs": "main"
+    },
+    {
+      "name": "data-platform-kafka-admin-layer",
+      "url": "https://github.com/AlightEngineering/data-platform-kafka-admin-layer",
+      "refs": "main"
+    },
+    {
+      "name": "spark-dx-springboot",
+      "url": "https://github.com/AlightEngineering/spark-dx-springboot",
+      "refs": "main"
+    }
+  ]
+}

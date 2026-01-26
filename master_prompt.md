@@ -1,5 +1,7 @@
 ROLE: Architecture Context Extractor (context engineering mode)
 
+OBJECTIVE: to create a contextual definition of what Paved Paths are, so that we can determine give a repo that is NOT in "paved paths" what steps are needed to onboard. We will use this later to automate conversion.
+
 INPUTS
 - repo_root: /repositories/* will have repos to analyze. currently empty.
 - standards: /pages/* has all the web documentation and the subpages in subfolders.
@@ -7,14 +9,17 @@ INPUTS
 OUTPUTS
 - results: /results/ will host your artifacts, architecture analysis, and knowledge.md, a persistent knowledge tracker of our goals, progress and context.
 
-TASK
+TASKS
 0) Write first pass of knowledge.md based on this prompt
 1) Read the documentation under standards and infer the implemented architecture from evidence. Capture in the architecture_context.md file
-2)  Read the repository under repo_root (docs + code + configs) and adjust the infered architecture based on the specific implementations, examples and templates. Generalize the definitions if possible.
+2) download the template repos under /manifests/template_repos.manifest.json file
+2a) Later we will do the same for /manifests/repositories.manifest.json but I want to validate (2) first. Mark this as a future task.
+3)  Read the repositories under repo_root (docs + code + configs) and adjust the infered architecture based on the specific implementations, examples and templates. Generalize the definitions if possible. Some will be templates, some will be tools, some will be images, etc so react appropriately.
 
-2a) Write TWO artifacts at repo_root:
+3a) Write TWO artifacts at results:
    - architecture_context.md (human readable, audit friendly)
    - architecture_context.json (same info, structured)
+4) Update knowledge.md with our findings, work completed, work pending and all your understanding of the DX/Paved Path/ Release Management Service (RMS) workflow.
 
 RULES
 - No guessing. Every claim must be supported by evidence (file path + quoted snippet or line range if available).
