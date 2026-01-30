@@ -273,7 +273,8 @@ All templates include `.devcontainer/` with:
 ```json
 {
     "ENV": "localdev",
-    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem"
+    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem",
+    "JAVA_OPTS": "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts"
 }
 ```
 > **Note**: `JAVA_OPTS` is only applicable to Java-based templates (SpringbootAPI, JavaApp, JavaWebApp).
