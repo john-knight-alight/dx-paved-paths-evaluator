@@ -264,7 +264,7 @@ The `dx-template-tfsolution-fargate` template provides:
 ### 6.2 Devcontainer Configuration
 
 All templates include `.devcontainer/` with:
-- Pre-configured development environment (Docker Compose used in some templates, not all)
+- Pre-configured development environment (includes devcontainer and/or Docker Compose configuration)
 - Zscaler certificate handling (`NODE_EXTRA_CA_CERTS` for Node.js; `JAVA_OPTS` for Java templates only)
 - VS Code extensions pre-installed (Checkmarx, language-specific)
 
