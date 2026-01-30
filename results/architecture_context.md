@@ -367,6 +367,42 @@ During `make pr`, developers enter JIRA IDs which are embedded in commit message
 
 > **Note**: JIRA IDs must be entered during `make pr`. Editing the PR description after creation does NOT update the JIRA tracking.
 
+### 10.5 Code Pipeline Integration
+
+During the Continuous Deployment (CD) phase via AWS CodePipeline, the Release Management Service performs critical deployment tracking and quality assurance activities:
+
+#### Pre-Deployment Activities
+
+1. **Deployment Registration**
+   - Registers the deployment attempt with deployment metadata (environment, timestamp, initiator)
+   - Records associated artifact identifiers (container image tags, Terraform state references)
+   - Links deployment to source commit SHA and associated JIRA tickets
+
+2. **Pre-Deploy Quality Gates**
+   - Executes all configured quality gates (see Section 10.3)
+   - Validates ServiceNow change request approval status
+   - Verifies deployer has appropriate BSN approval rights
+   - **Blocks deployment** if any quality gate fails
+
+#### Post-Deployment Activities
+
+1. **Deployment Confirmation**
+   - Records deployment success/failure status
+   - Updates deployment duration and completion timestamp
+   - Captures deployment logs and artifacts for audit trail
+
+2. **Post-Deploy Quality Gates**
+   - Executes smoke tests and health checks (when configured)
+   - Validates service availability in target environment
+   - Triggers rollback procedures if post-deploy validation fails
+
+3. **Integration Updates**
+   - Updates JIRA tickets with deployment status and environment
+   - Updates ServiceNow change requests with deployment completion
+   - Sends notifications to configured channels (Slack, email)
+
+> **Note**: All RMS CD activities are executed through Terraform's external data sources and null resources, which call RMS API endpoints during `terraform apply`.
+
 ---
 
 ## 11. Supporting Infrastructure
