@@ -11,7 +11,7 @@
 | [Template Repositories](#template-repositories) | 7 | Starting points for new projects |
 | [CI/CD & Automation](#cicd--automation) | 2 | GitHub Actions and workflow orchestration |
 | [Base Docker Images](#base-docker-images) | 7 | Foundation container images |
-| [Developer Tools](#developer-tools) | 4 | CLI, scripts, and dev utilities |
+| [Developer Tools](#developer-tools) | 3 | CLI and dev utilities |
 | [Terraform & IaC](#terraform--iac) | 1 | Infrastructure as Code providers |
 | [Services](#services) | 2 | Platform services (RMS, metrics) |
 | [Libraries](#libraries) | 2 | Shared code libraries |
@@ -28,9 +28,9 @@ These are the **starting points** for creating new Paved Path compliant projects
 | [dx-template-springboot](https://github.com/AlightEngineering/dx-template-springboot) | `SpringbootAPI` | Java | Spring Boot REST API template with Gradle, actuator endpoints, and Fargate deployment |
 | [dx-template-python](https://github.com/AlightEngineering/dx-template-python) | `PythonLambda` | Python | AWS Lambda function template with layer support |
 | [dx-template-angular](https://github.com/AlightEngineering/dx-template-angular) | `AngularApp` | TypeScript | Angular single-page application template |
-| [dx-template-docker](https://github.com/AlightEngineering/dx-template-docker) | `Docker` | Any | Generic Docker container template for custom images or importing external images |
+| [dx-template-docker](https://github.com/AlightEngineering/dx-template-docker) | `Docker` | Any | Template for custom Docker images or importing external images to Alight ECR |
 | [dx-template-html](https://github.com/AlightEngineering/dx-template-html) | `HTML` | HTML/CSS/JS | Static HTML website template |
-| [dx-template-java](https://github.com/AlightEngineering/dx-template-java) | `JavaApp` | Java | Java web application template (Tomcat-based) |
+| [dx-template-java-webapp](https://github.com/AlightEngineering/dx-template-java-webapp) | `JavaWebApp` | Java | JSP/Servlet-based Java apps requiring an application server |
 | [dx-template-tfsolution-fargate](https://github.com/AlightEngineering/dx-template-tfsolution-fargate) | N/A (IaC) | Terraform | Terraform solution for deploying applications to ECS Fargate |
 
 ### When to Use Each Template
@@ -43,7 +43,7 @@ These are the **starting points** for creating new Paved Path compliant projects
 | Create a custom Docker image | `dx-template-docker` |
 | Import an external Docker image | `dx-template-docker` (with `external_image` config) |
 | Deploy a simple static website | `dx-template-html` |
-| Build a traditional Java web app (WAR) | `dx-template-java` |
+| Build a JSP/Servlet-based app | `dx-template-java-webapp` |
 | Deploy to AWS Fargate | `dx-template-tfsolution-fargate` |
 
 ---
@@ -62,9 +62,10 @@ These repositories contain the **reusable GitHub Actions workflows** that power 
 | Workflow | Paved Path | Trigger |
 |----------|------------|---------|
 | `docker-paved-path-*.yml` | Docker | push, pr, publish |
-| `java-paved-path-*.yml` | SpringBoot, JavaApp | push, pr, publish |
+| `java-paved-path-*.yml` | SpringBoot, JavaApp, JavaWebApp | push, pr, publish |
 | `java-lib-paved-path-*.yml` | Java Libraries | push, pr, publish |
 | `python-paved-path-*.yml` | Python Lambda | push, pr, publish |
+| `python-lib-paved-path-*.yml` | Python Libraries | push, pr, publish |
 | `spa-paved-path-*.yml` | Angular, HTML | push, pr, publish |
 | `init.yml` | All | Manual/workflow_dispatch |
 | `release-gate-map-*.yml` | RMS | Quality gate configuration |
@@ -97,8 +98,7 @@ Tools that developers use **locally** for development and project management.
 
 | Repository | Tool | Description | Installation |
 |------------|------|-------------|--------------|
-| [dx-cli](https://github.com/AlightEngineering/dx-cli) | `dx` command | Main developer CLI for: creating new repos, updating templates, validating prerequisites, drift detection | `pip install dx-cli --trusted-host artifactory.alight.com -i https://artifactory.alight.com/artifactory/api/pypi/dx-pypi-virtual/simple` |
-| [dx-userscripts](https://github.com/AlightEngineering/dx-userscripts) | Scripts | Utility scripts for developer machines | N/A |
+| [dx-cli](https://github.com/AlightEngineering/dx-cli) | `dx` command | Main developer CLI for: creating new repos, updating templates, validating prerequisites, drift detection, config management, CodeCommit initialization | `pip install dx-cli --trusted-host artifactory.alight.com -i https://artifactory.alight.com/artifactory/api/pypi/dx-pypi-virtual/simple` |
 | [dx-developer-doc](https://github.com/AlightEngineering/dx-developer-doc) | Documentation | Internal DX team documentation (not end-user docs) | N/A |
 | [dx-containers](https://github.com/AlightEngineering/dx-containers) | DevContainers | VS Code devcontainer definitions | Used automatically via `.devcontainer/` |
 
@@ -110,7 +110,9 @@ Tools that developers use **locally** for development and project management.
 | Windows/Linux | Validate software prerequisites | ✅ Done |
 | Windows/Linux | Create GitHub repos from templates | ✅ Done |
 | Windows/Linux | Base64 encode config files for Terraform | ✅ Done |
+| Windows/Linux | Initialize AWS CodeCommit repo with terraform template | ✅ Done |
 | Docker (devcontainer) | Self-updating | ✅ Done |
+| Docker (devcontainer) | Configuration management in devcontainers | ✅ Done |
 | Docker (devcontainer) | Detect and fix template drift | 🔄 In Progress |
 | Docker (devcontainer) | Validate `.alit.json` | 📋 Planned |
 
@@ -135,28 +137,6 @@ Backend services that power the Paved Paths platform.
 | [dx-release-management](https://github.com/AlightEngineering/dx-release-management) | **Release Management Service (RMS)** | FastAPI service that: injects quality gates into deployments, updates JIRA/ServiceNow tickets with build status, enables natural-language queries for release metrics |
 | [dx-release-metrics-dx-service-image](https://github.com/AlightEngineering/dx-release-metrics-dx-service-image) | RMS Docker Image | Dockerfile for building the RMS container (temporary repo until monorepo support) |
 
-### RMS Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                 Release Management Service               │
-├─────────────────────────────────────────────────────────┤
-│  Endpoints:                                              │
-│  - /api/v1/ci/*  → CI build & JIRA integration          │
-│  - /api/v1/cd/*  → CD deployment validation             │
-│  - /api/v1/snow/* → ServiceNow integration              │
-├─────────────────────────────────────────────────────────┤
-│  Quality Gates:                                          │
-│  - SNOW Change Compliance                                │
-│  - BSN Approver Validation                               │
-├─────────────────────────────────────────────────────────┤
-│  Integrations:                                           │
-│  - JIRA API                                              │
-│  - ServiceNow API                                        │
-│  - AWS Services                                          │
-└─────────────────────────────────────────────────────────┘
-```
-
 ---
 
 ## Libraries
@@ -166,7 +146,7 @@ Shared code libraries used across multiple projects.
 | Repository | Language | Description |
 |------------|----------|-------------|
 | [dx-lib-java](https://github.com/AlightEngineering/dx-lib-java) | Java | Java libraries including `dx-s3-download` for downloading S3 objects |
-| [dx-mcpcommonshared-util](https://github.com/AlightEngineering/dx-mcpcommonshared-util) | Java | Template for creating and publishing Java libraries with BOM support |
+| [dx-mcpcommonshared-util](https://github.com/AlightEngineering/dx-mcpcommonshared-util) | Java | MCP-specific shared Java utilities |
 
 ---
 

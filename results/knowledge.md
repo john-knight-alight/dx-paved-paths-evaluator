@@ -32,9 +32,10 @@ Extract a contextual definition of "Paved Paths" from documentation and template
 | `SpringbootAPI` | dx-template-springboot | Java | Container (Fargate) |
 | `PythonLambda` | dx-template-python | Python | Lambda |
 | `AngularApp` | dx-template-angular | TypeScript | Static (S3/CloudFront) |
-| `Docker` | dx-template-docker | Any | Container (Fargate) |
+| `Docker` | dx-template-docker | Any | Container (for custom images or external imports) |
 | `HTML` | dx-template-html | HTML | Static |
 | `JavaApp` | dx-template-java | Java | Container (Fargate) |
+| `JavaWebApp` | dx-template-java-webapp | Java | Container (JSP/Servlet apps) |
 
 ---
 
@@ -67,7 +68,7 @@ Every Paved Path repository **MUST** contain:
             "name": "<lowercase-artifact-name>",
             "BusinessServiceName": "<BSN from ServiceNow>"
         },
-        "paved_path": "<SpringbootAPI|PythonLambda|AngularApp|Docker|HTML|JavaApp>"
+        "paved_path": "<SpringbootAPI|PythonLambda|AngularApp|Docker|HTML|JavaApp|JavaWebApp>"
     }
 }
 ```
@@ -75,6 +76,9 @@ Every Paved Path repository **MUST** contain:
 **Validation Rules:**
 - `artifact.name` MUST be lowercase (becomes ECR repo name)
 - `paved_path` MUST match a defined type
+
+**Key Rule for `.cz.json`:**
+- `major_version_zero` MUST be flipped to `false` when ready to create the first releasable artifact
 
 ### CI/CD Architecture
 - **Platform:** GitHub Actions
@@ -135,6 +139,28 @@ To make a repo Paved Path compliant:
 - [x] Task 7: Write architecture_context.json
 - [x] Task 8: Create inventory.md
 - [x] Task 9: Update knowledge.md with findings
+- [x] Task 10: Apply architectural review feedback
+
+---
+
+## Architectural Review Corrections Applied
+
+The following corrections were applied based on expert architectural review:
+
+| Area | Correction |
+|------|------------|
+| **Paved Path Types** | Added `JavaWebApp` (dx-template-java-webapp) for JSP/Servlet apps |
+| **Docker Template** | Clarified it's also used for importing external images to ECR |
+| **Quality Gates** | Moved to CD phase (CodePipeline), not CI (GitHub Actions) |
+| **major_version_zero** | Added key rule - must flip to `false` for first release |
+| **Hotfix Strategy** | Marked as TBD - not yet defined |
+| **Docker Desktop** | Only required on Alight Windows laptops |
+| **JAVA_OPTS** | Only applicable to Java-based templates |
+| **dx-distroless** | Removed - not part of active ecosystem |
+| **dx-userscripts** | Removed - not part of active ecosystem |
+| **dx-cli Features** | Added config management and CodeCommit initialization |
+| **DevContainers** | Added dx-devcontainer-docker |
+| **python-lib workflow** | Added to dx-automation workflows |
 
 ---
 
@@ -147,9 +173,10 @@ A key discovery from analyzing dx-tools repositories:
 | **Repository** | dx-release-management |
 | **Technology** | FastAPI (Python) |
 | **Purpose** | Quality gates, JIRA/ServiceNow integration |
+| **Enforcement Phase** | CD (CodePipeline), NOT CI (GitHub Actions) |
 
 ### RMS Capabilities
-- Injects quality gates into deployment process
+- Injects quality gates into deployment process (during CD phase)
 - Updates JIRA tickets with BuildArtifacts and DeployStatus
 - Validates ServiceNow change requests
 - Enables natural-language queries for release metrics
@@ -160,13 +187,15 @@ A key discovery from analyzing dx-tools repositories:
 | SNOW Change Compliance | Validates ServiceNow change request is approved |
 | BSN Approver Validation | Validates deployer has approval rights |
 
+> **Note**: Quality gates list is actively being expanded.
+
 ---
 
 ## Evidence Log
 
 | Claim | Source | Confidence |
 |-------|--------|------------|
-| 6 active paved path types | Template `.alit.json` files | High |
+| 7 active paved path types | Template `.alit.json` files + architectural review | High |
 | GitHub Actions is CI/CD platform | Workflow files in templates | High |
 | Reusable workflows in dx-automation | Workflow `uses:` declarations | High |
 | ECR URI is 755600509381.dkr.ecr.us-east-1.amazonaws.com | Makefile `ecr-login` target | High |
@@ -185,7 +214,7 @@ A key discovery from analyzing dx-tools repositories:
 
 ## Repository Summary
 
-### Template Repos (7 cloned)
+### Template Repos (8 active)
 Located in `/repositories/`:
 - dx-template-springboot
 - dx-template-python
@@ -193,20 +222,23 @@ Located in `/repositories/`:
 - dx-template-docker
 - dx-template-html
 - dx-template-java
+- dx-template-java-webapp
 - dx-template-tfsolution-fargate
 
-### Supporting Tool Repos (19 cloned)
+### Supporting Tool Repos (Active)
 Located in `/repositories/dx-tools/`:
 
 | Category | Repositories |
 |----------|--------------|
 | **CI/CD** | dx-automation, dx-action-runner |
-| **Developer Tools** | dx-cli, dx-userscripts, dx-developer-doc |
+| **Developer Tools** | dx-cli, dx-developer-doc |
 | **Services** | dx-release-management, dx-release-metrics-dx-service-image |
-| **Base Images** | dx-alpine, dx-node, dx-python, dx-distroless, dx-base-fastapi, dx-containers |
+| **Base Images** | dx-alpine, dx-node, dx-python, dx-base-fastapi, dx-containers |
 | **Libraries** | dx-lib-java, dx-mcpcommonshared-util |
 | **Infrastructure** | dx-tf-alight-provider, dx-vms |
 | **Examples** | spark-dx-springboot, data-platform-kafka-admin-layer |
+
+> **Note**: dx-distroless and dx-userscripts are not part of the active ecosystem.
 
 ---
 
