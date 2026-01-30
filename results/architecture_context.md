@@ -32,7 +32,6 @@
 | `AngularApp` | `dx-template-angular` | Angular single-page applications |
 | `Docker` | `dx-template-docker` | Custom Docker container images or importing external images to Alight ECR |
 | `HTML` | `dx-template-html` | Static HTML sites |
-| `JavaApp` | `dx-template-java` | Java web applications |
 | `JavaWebApp` | `dx-template-java-webapp` | JSP/Servlet-based Java apps requiring an application server |
 
 ### 2.2 Required Files for Paved Path Compliance
