@@ -8,7 +8,7 @@
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| [Template Repositories](#template-repositories) | 8 | Starting points for new projects |
+| [Template Repositories](#template-repositories) | 7 | Starting points for new projects |
 | [CI/CD & Automation](#cicd--automation) | 2 | GitHub Actions and workflow orchestration |
 | [Base Docker Images](#base-docker-images) | 7 | Foundation container images |
 | [Developer Tools](#developer-tools) | 3 | CLI and dev utilities |
@@ -30,7 +30,6 @@ These are the **starting points** for creating new Paved Path compliant projects
 | [dx-template-angular](https://github.com/AlightEngineering/dx-template-angular) | `AngularApp` | TypeScript | Angular single-page application template |
 | [dx-template-docker](https://github.com/AlightEngineering/dx-template-docker) | `Docker` | Any | Template for custom Docker images or importing external images to Alight ECR |
 | [dx-template-html](https://github.com/AlightEngineering/dx-template-html) | `HTML` | HTML/CSS/JS | Static HTML website template |
-| [dx-template-java](https://github.com/AlightEngineering/dx-template-java) | `JavaApp` | Java | Java web application template (Tomcat-based) |
 | [dx-template-java-webapp](https://github.com/AlightEngineering/dx-template-java-webapp) | `JavaWebApp` | Java | JSP/Servlet-based Java apps requiring an application server |
 | [dx-template-tfsolution-fargate](https://github.com/AlightEngineering/dx-template-tfsolution-fargate) | N/A (IaC) | Terraform | Terraform solution for deploying applications to ECS Fargate |
 
