@@ -44,7 +44,6 @@ These are the **starting points** for creating new Paved Path compliant projects
 | Create a custom Docker image | `dx-template-docker` |
 | Import an external Docker image | `dx-template-docker` (with `external_image` config) |
 | Deploy a simple static website | `dx-template-html` |
-| Build a traditional Java web app (WAR) | `dx-template-java` |
 | Build a JSP/Servlet-based app | `dx-template-java-webapp` |
 | Deploy to AWS Fargate | `dx-template-tfsolution-fargate` |
 
