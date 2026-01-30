@@ -30,9 +30,10 @@
 | `SpringbootAPI` | `dx-template-springboot` | Java Spring Boot REST APIs |
 | `PythonLambda` | `dx-template-python` | Python AWS Lambda functions |
 | `AngularApp` | `dx-template-angular` | Angular single-page applications |
-| `Docker` | `dx-template-docker` | Custom Docker container images |
+| `Docker` | `dx-template-docker` | Custom Docker container images or importing external images to Alight ECR |
 | `HTML` | `dx-template-html` | Static HTML sites |
 | `JavaApp` | `dx-template-java` | Java web applications |
+| `JavaWebApp` | `dx-template-java-webapp` | JSP/Servlet-based Java apps requiring an application server |
 
 ### 2.2 Required Files for Paved Path Compliance
 
@@ -101,6 +102,7 @@ Controls semantic versioning and commit message formats.
 ```
 
 **Key Rules:**
+- **`major_version_zero`**: MUST be flipped to `false` when ready to create the first releasable artifact
 - When `version` major > 0, `update_changelog_on_bump` MUST be `true`
 - Uses conventional commit format: `type(scope): message`
 - Requires JIRA IDs in commit footer
@@ -198,6 +200,8 @@ gitGraph
 - Hotfix branches: `hotfix/<jira-id>-description`
 - All merges to `main` trigger automatic versioning and tagging
 
+> **Note**: The hotfix strategy is not yet fully defined. Consult DX team for current guidance.
+
 ---
 
 ## 5. Deployment Architecture
@@ -253,7 +257,7 @@ The `dx-template-tfsolution-fargate` template provides:
 
 | Tool | Installation | Purpose |
 |------|--------------|---------|
-| Docker Desktop | Manual | Container runtime |
+| Docker Desktop | Manual | Container runtime (only required on Alight Windows laptops) |
 | VS Code | Manual | IDE with devcontainer support |
 | dx-cli | `pip install dx-cli --trusted-host artifactory.alight.com -i https://artifactory.alight.com/artifactory/api/pypi/dx-pypi-virtual/simple` | Alight CLI tool |
 | GitHub CLI | Manual | Git operations |
@@ -261,18 +265,18 @@ The `dx-template-tfsolution-fargate` template provides:
 ### 6.2 Devcontainer Configuration
 
 All templates include `.devcontainer/` with:
-- Pre-configured Docker Compose environment
-- Zscaler certificate handling (`NODE_EXTRA_CA_CERTS`, `JAVA_OPTS`)
+- Pre-configured development environment (Docker Compose used in some templates, not all)
+- Zscaler certificate handling (`NODE_EXTRA_CA_CERTS` for Node.js; `JAVA_OPTS` for Java templates only)
 - VS Code extensions pre-installed (Checkmarx, language-specific)
 
-**Environment Variables:**
+**Environment Variables (vary by template):**
 ```json
 {
     "ENV": "localdev",
-    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem",
-    "JAVA_OPTS": "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts"
+    "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem"
 }
 ```
+> **Note**: `JAVA_OPTS` is only applicable to Java-based templates (SpringbootAPI, JavaApp, JavaWebApp).
 
 ---
 
@@ -292,41 +296,6 @@ To onboard a repository to Paved Paths, ensure:
 - [ ] Branching strategy follows trunk-based development (main only)
 - [ ] No secrets or credentials in source code
 - [ ] Container image published to approved ECR registry
-
-### 7.2 Validation Commands
-
-```bash
-# Verify pre-commit hooks work
-make pre-commit
-
-# Verify commitizen configuration
-cz check --rev-range HEAD~5..HEAD
-
-# Verify artifact name is lowercase
-jq -r '.build.artifact.name' .alit.json | grep -E '^[a-z0-9-]+$'
-
-# Verify paved path type is set
-jq -r '.build.paved_path' .alit.json
-```
-
----
-
-## 8. Evidence Table
-
-| Component | Source File | Evidence Location |
-|-----------|-------------|-------------------|
-| Paved Path Config Schema | `.alit.json` | [dx-template-springboot/.alit.json](../repositories/dx-template-springboot/.alit.json) |
-| Commitizen Config | `.cz.json` | [dx-template-springboot/.cz.json](../repositories/dx-template-springboot/.cz.json) |
-| Pre-commit Hooks | `.pre-commit-config.yaml` | [dx-template-springboot/.pre-commit-config.yaml](../repositories/dx-template-springboot/.pre-commit-config.yaml) |
-| Standard Makefile | `Makefile` | [dx-template-docker/Makefile](../repositories/dx-template-docker/Makefile) |
-| CI/CD Push Workflow | `.github/workflows/push.yml` | [dx-template-springboot/.github/workflows/push.yml](../repositories/dx-template-springboot/.github/workflows/push.yml) |
-| CI/CD PR Workflow | `.github/workflows/pr.yml` | [dx-template-springboot/.github/workflows/pr.yml](../repositories/dx-template-springboot/.github/workflows/pr.yml) |
-| CI/CD Publish Workflow | `.github/workflows/publish.yml` | [dx-template-springboot/.github/workflows/publish.yml](../repositories/dx-template-springboot/.github/workflows/publish.yml) |
-| CI/CD Init Workflow | `.github/workflows/init.yml` | [dx-template-springboot/.github/workflows/init.yml](../repositories/dx-template-springboot/.github/workflows/init.yml) |
-| Devcontainer Config | `.devcontainer/devcontainer.json` | [dx-template-springboot/.devcontainer/devcontainer.json](../repositories/dx-template-springboot/.devcontainer/devcontainer.json) |
-| Terraform Fargate Template | `*.tf` | [dx-template-tfsolution-fargate/](../repositories/dx-template-tfsolution-fargate/) |
-| ECR Registry URI | Makefile `ecr-login` target | `755600509381.dkr.ecr.us-east-1.amazonaws.com` |
-| DX CLI Installation | README.md | `pip install dx-cli --trusted-host artifactory.alight.com` |
 
 ---
 
@@ -360,23 +329,26 @@ The Release Management Service is a critical backend component that integrates w
 
 ```mermaid
 flowchart TB
-    subgraph "CI Pipeline"
+    subgraph "CI Pipeline (GitHub Actions)"
         PR[Pull Request] --> |"make pr"| CZ[Commitizen]
         CZ --> |"jira_ids in commit"| GH[GitHub Workflow]
-        GH --> |"/api/v1/ci/*"| RMS[Release Management Service]
+        GH --> |"Build & Publish"| ECR[AWS ECR]
     end
     
-    subgraph "RMS"
+    subgraph "CD Pipeline (CodePipeline)"
+        ECR --> TF[Terraform Apply]
+        TF --> |"/api/v1/cd/*"| RMS[Release Management Service]
+        RMS --> GATES[Quality Gates]
+        GATES --> |"Pass/Fail"| DEPLOY[ECS Fargate]
+    end
+    
+    subgraph "RMS Integrations"
         RMS --> JIRA[Update JIRA Tickets]
         RMS --> SNOW[Update ServiceNow]
-        RMS --> GATES[Quality Gates]
-    end
-    
-    subgraph "CD Pipeline"
-        DEPLOY[CodePipeline Deploy] --> |"/api/v1/cd/*"| RMS
-        GATES --> |"Pass/Fail"| DEPLOY
     end
 ```
+
+> **Note**: Quality gates are enforced during the CD phase (CodePipeline), not during CI (GitHub Actions).
 
 ### 10.3 Quality Gates
 
@@ -384,6 +356,8 @@ flowchart TB
 |------|-------------|-------------|
 | SNOW Change Compliance | Validates ServiceNow change request exists and is approved | CD deployment blocked if failed |
 | BSN Approver Validation | Validates deployer has approval rights for Business Service | CD deployment blocked if failed |
+
+> **Note**: This list is actively being expanded. Additional quality gates are in development.
 
 ### 10.4 JIRA Integration
 
@@ -406,7 +380,7 @@ All application containers inherit from approved base images:
 | `dx-alpine` | [dx-alpine](https://github.com/AlightEngineering/dx-alpine) | Alpine Linux with Alight certs |
 | `dx-node` | [dx-node](https://github.com/AlightEngineering/dx-node) | Node.js runtime |
 | `dx-python` | [dx-python](https://github.com/AlightEngineering/dx-python) | Python runtime |
-| `dx-distroless` | [dx-distroless](https://github.com/AlightEngineering/dx-distroless) | Minimal distroless base |
+
 | `dx-base-fastapi` | [dx-base-fastapi](https://github.com/AlightEngineering/dx-base-fastapi) | FastAPI Python base |
 
 ### 11.2 Developer CLI (dx-cli)
@@ -416,6 +390,9 @@ All application containers inherit from approved base images:
 | Create GitHub repos from templates | Windows/Linux | ✅ Done |
 | Validate software prerequisites | Windows/Linux | ✅ Done |
 | Self-updating | All | ✅ Done |
+| Base64 encode config files for Terraform | Windows/Linux | ✅ Done |
+| Configuration management in devcontainers | Docker (devcontainer) | ✅ Done |
+| Initialize AWS CodeCommit repo with terraform template | Windows/Linux | ✅ Done |
 | Detect and fix template drift | Docker (devcontainer) | 🔄 In Progress |
 | Validate `.alit.json` | Docker (devcontainer) | 📋 Planned |
 
@@ -434,6 +411,7 @@ DevContainers are built and published from [dx-containers](https://github.com/Al
 | `dx-devcontainer-java` | Java/Spring Boot development |
 | `dx-devcontainer-python` | Python development |
 | `dx-devcontainer-node` | Angular/Node.js development |
+| `dx-devcontainer-docker` | Docker image development |
 
 ### 11.4 Custom Terraform Provider
 
@@ -445,9 +423,11 @@ DevContainers are built and published from [dx-containers](https://github.com/Al
 
 ---
 
-## 12. Docker Image Tagging Strategy
+## 12. Docker Paved Path Image Tagging Strategy
 
-Paved Paths uses a layered image tagging strategy that preserves lineage:
+> **Scope**: This section applies specifically to the **Docker paved path** (`dx-template-docker`) for creating custom images or importing external images to Alight ECR.
+
+The Docker paved path uses a layered image tagging strategy that preserves lineage:
 
 | Image Type | Tag Format | Example |
 |------------|------------|---------|
@@ -464,15 +444,22 @@ Paved Paths uses a layered image tagging strategy that preserves lineage:
 
 Source: [manifests/template_repos.manifest.json](../manifests/template_repos.manifest.json)
 
+**Application Templates:**
+
+| Repository | Paved Path Type | Description |
+|------------|-----------------|-------------|
+| dx-template-springboot | SpringbootAPI | Spring Boot REST API template |
+| dx-template-python | PythonLambda | Python AWS Lambda template |
+| dx-template-angular | AngularApp | Angular SPA template |
+| dx-template-docker | Docker | Docker container or external image import template |
+| dx-template-html | HTML | Static HTML site template |
+| dx-template-java | JavaApp | Java web application template |
+| dx-template-java-webapp | JavaWebApp | JSP/Servlet-based Java apps |
+
+**Infrastructure Templates:**
+
 | Repository | Description |
 |------------|-------------|
-| dx-template-springboot | Spring Boot API template |
-| dx-template-python | Python Lambda template |
-| dx-template-angular | Angular SPA template |
-| dx-template-docker | Docker container template |
-| dx-template-html | Static HTML site template |
-| dx-template-java | Java web application template |
-| dx-template-python-simple | Simplified Python template |
 | dx-template-tfsolution-fargate | Terraform Fargate IaC template |
 | dx-template-terraform-modules-ecs | ECS Terraform modules |
 | dx-template-terraform-modules-alb | ALB Terraform modules |
@@ -480,7 +467,6 @@ Source: [manifests/template_repos.manifest.json](../manifests/template_repos.man
 | dx-template-terraform-modules-nlb | NLB Terraform modules |
 | dx-template-terraform-modules-rds | RDS Terraform modules |
 | dx-template-terraform-modules-s3 | S3 Terraform modules |
-| dx-template-databricks | Databricks template |
 
 ---
 
@@ -497,14 +483,12 @@ Source: [manifests/repositories.manifest.json](../manifests/repositories.manifes
 | dx-alpine | Base Image | Alpine Linux base |
 | dx-node | Base Image | Node.js runtime base |
 | dx-python | Base Image | Python runtime base |
-| dx-distroless | Base Image | Minimal distroless base |
 | dx-base-fastapi | Base Image | FastAPI Python base |
 | dx-lib-java | Library | Java libraries (S3 download, etc.) |
 | dx-tf-alight-provider | IaC | Custom Terraform provider |
 | dx-vms | Infrastructure | Packer templates for Vagrant boxes |
 | dx-action-runner | CI/CD | GitHub Actions runner config |
 | dx-developer-doc | Documentation | Internal DX team docs |
-| dx-userscripts | Utilities | Developer utility scripts |
 
 ---
 
