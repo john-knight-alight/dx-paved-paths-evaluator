@@ -379,10 +379,9 @@ During the Continuous Deployment (CD) phase via AWS CodePipeline, the Release Ma
    - Links deployment to source commit SHA and associated JIRA tickets
 
 2. **Pre-Deploy Quality Gates**
-   - Executes all configured quality gates (see Section 10.3)
-   - Validates ServiceNow change request approval status
-   - Verifies deployer has appropriate BSN approval rights
+   - Executes all configured quality gates (see Section 10.3 for full list)
    - **Blocks deployment** if any quality gate fails
+   - Returns detailed failure messages for remediation
 
 #### Post-Deployment Activities
 
