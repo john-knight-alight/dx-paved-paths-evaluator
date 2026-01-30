@@ -155,7 +155,6 @@ The following corrections were applied based on expert architectural review:
 | **major_version_zero** | Added key rule - must flip to `false` for first release |
 | **Hotfix Strategy** | Marked as TBD - not yet defined |
 | **Docker Desktop** | Only required on Alight Windows laptops |
-| **JAVA_OPTS** | Only applicable to Java-based templates |
 | **dx-distroless** | Removed - not part of active ecosystem |
 | **dx-userscripts** | Removed - not part of active ecosystem |
 | **dx-cli Features** | Added config management and CodeCommit initialization |

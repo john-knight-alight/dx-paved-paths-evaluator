@@ -266,7 +266,7 @@ The `dx-template-tfsolution-fargate` template provides:
 
 All templates include `.devcontainer/` with:
 - Pre-configured development environment (Docker Compose used in some templates, not all)
-- Zscaler certificate handling (`NODE_EXTRA_CA_CERTS` for Node.js; `JAVA_OPTS` for Java templates only)
+- Zscaler certificate handling (`NODE_EXTRA_CA_CERTS` for Node.js templates)
 - VS Code extensions pre-installed (Checkmarx, language-specific)
 
 **Environment Variables (vary by template):**
@@ -276,7 +276,6 @@ All templates include `.devcontainer/` with:
     "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem"
 }
 ```
-> **Note**: `JAVA_OPTS` is only applicable to Java-based templates (SpringbootAPI, JavaApp, JavaWebApp).
 
 ---
 
